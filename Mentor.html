@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentor-Student App</title>
+    <style>
+        /* General body and container styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #1a73e8;
+            border-bottom: 2px solid #e8e8e8;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        /* Form styling */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="password"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box; /* Ensures padding doesn't affect width */
+        }
+        
+        textarea {
+            resize: vertical;
+        }
+
+        /* Button styling */
+        .btn {
+            background-color: #1a73e8;
+            color: #fff;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Dashboard specific styling */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-header .welcome {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .dashboard-header .logout-btn {
+            background-color: #dc3545;
+        }
+
+        .section {
+            background-color: #f8f9fa;
+            border: 1px solid #e8e8e8;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item {
+            border: 1px solid #e8e8e8;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+
+        .list-item h4 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+
+        .list-item p {
+            margin: 5px 0;
+        }
+
+        .list-item .details {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e8e8e8;
+        }
+
+        /* Utility classes */
+        .hidden {
+            display: none;
+        }
+
+        .alert {
+            background-color: #ffcccc;
+            color: #cc0000;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="login-view">
+        <h1>Login</h1>
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username">
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password">
+        </div>
+        <button id="login-btn" class="btn">Login</button>
+        <div id="login-message" class="alert hidden"></div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-view" class="hidden">
+        <div class="dashboard-header">
+            <span class="welcome">Welcome, Admin</span>
+            <button id="admin-logout-btn" class="btn logout-btn">Logout</button>
+        </div>
+        <h2>Admin Dashboard</h2>
+        <div class="section">
+            <div class="section-header">
+                <h3>All Activities</h3>
+                <button id="refresh-admin-btn" class="btn btn-secondary">Refresh</button>
+            </div>
+            <div id="admin-activities-list"></div>
+        </div>
+        <div class="section">
+            <h3>Create New User</h3>
+            <div class="form-group">
+                <label for="new-user-username">Username:</label>
+                <input type="text" id="new-user-username">
+            </div>
+            <div class="form-group">
+                <label for="new-user-password">Password:</label>
+                <input type="password" id="new-user-password">
+            </div>
+            <div class="form-group">
+                <label for="new-user-role">Role:</label>
+                <select id="new-user-role">
+                    <option value="mentor">Mentor</option>
+                    <option value="student">Student</option>
+                </select>
+            </div>
+            <button id="create-user-btn" class="btn">Create User</button>
+            <div id="user-creation-message" class="alert hidden"></div>
+        </div>
+    </div>
+
+    <!-- Mentor Dashboard -->
+    <div id="mentor-view" class="hidden">
+        <div class="dashboard-header">
+            <span class="welcome" id="mentor-welcome-message"></span>
+            <button id="mentor-logout-btn" class="btn logout-btn">Logout</button>
+        </div>
+        <h2>Mentor Dashboard</h2>
+        <div class="section">
+            <h3>Create a New Task</h3>
+            <div class="form-group">
+                <label for="task-title">Task Title:</label>
+                <input type="text" id="task-title">
+            </div>
+            <div class="form-group">
+                <label for="task-description">Description:</label>
+                <textarea id="task-description" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="assign-student">Assign to Student:</label>
+                <select id="assign-student"></select>
+            </div>
+            <button id="create-task-btn" class="btn">Create Task</button>
+            <div id="task-creation-message" class="alert hidden"></div>
+        </div>
+        <div class="section">
+            <h3>My Tasks and Grades</h3>
+            <div id="mentor-tasks-list"></div>
+        </div>
+    </div>
+
+    <!-- Student Dashboard -->
+    <div id="student-view" class="hidden">
+        <div class="dashboard-header">
+            <span class="welcome" id="student-welcome-message"></span>
+            <button id="student-logout-btn" class="btn logout-btn">Logout</button>
+        </div>
+        <h2>Student Dashboard</h2>
+        <div class="section">
+            <h3>My Tasks</h3>
+            <div id="student-tasks-list"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Data Storage (In-memory Array-based) ---
+    // This is a simple, non-persistent data store. Data will be lost on page refresh.
+    const database = {
+        users: [
+            { id: 1, username: 'admin', password: 'password', role: 'admin' },
+            { id: 2, username: 'mentor1', password: 'password', role: 'mentor' },
+            { id: 3, username: 'student1', password: 'password', role: 'student' }
+        ],
+        tasks: [], // tasks assigned to students
+        grades: [], // grades and feedback given by mentors
+        feedback: [] // student feedback (doubts) to mentors
+    };
+
+    let currentUser = null;
+    let nextUserId = 4;
+    let nextTaskId = 1;
+    let nextGradeId = 1;
+    let nextFeedbackId = 1;
+
+    // --- UI Element References ---
+    const loginView = document.getElementById('login-view');
+    const adminView = document.getElementById('admin-view');
+    const mentorView = document.getElementById('mentor-view');
+    const studentView = document.getElementById('student-view');
+
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const loginBtn = document.getElementById('login-btn');
+    const loginMessage = document.getElementById('login-message');
+
+    // Admin elements
+    const adminLogoutBtn = document.getElementById('admin-logout-btn');
+    const adminActivitiesList = document.getElementById('admin-activities-list');
+    const createUserBtn = document.getElementById('create-user-btn');
+    const newUserUsername = document.getElementById('new-user-username');
+    const newUserPassword = document.getElementById('new-user-password');
+    const newUserRole = document.getElementById('new-user-role');
+    const userCreationMessage = document.getElementById('user-creation-message');
+
+    // Mentor elements
+    const mentorLogoutBtn = document.getElementById('mentor-logout-btn');
+    const mentorWelcomeMessage = document.getElementById('mentor-welcome-message');
+    const taskTitleInput = document.getElementById('task-title');
+    const taskDescriptionInput = document.getElementById('task-description');
+    const assignStudentSelect = document.getElementById('assign-student');
+    const createTaskBtn = document.getElementById('create-task-btn');
+    const taskCreationMessage = document.getElementById('task-creation-message');
+    const mentorTasksList = document.getElementById('mentor-tasks-list');
+
+    // Student elements
+    const studentLogoutBtn = document.getElementById('student-logout-btn');
+    const studentWelcomeMessage = document.getElementById('student-welcome-message');
+    const studentTasksList = document.getElementById('student-tasks-list');
+
+    // --- Functions ---
+    // Hides all views and shows the specified view
+    function showView(viewId) {
+        const views = [loginView, adminView, mentorView, studentView];
+        views.forEach(view => {
+            view.classList.add('hidden');
+        });
+        document.getElementById(viewId).classList.remove('hidden');
+    }
+
+    // Displays a temporary message in the UI
+    function showMessage(element, message, type = 'error') {
+        element.textContent = message;
+        element.classList.remove('hidden');
+        element.style.backgroundColor = (type === 'error') ? '#ffcccc' : '#ccffcc';
+        element.style.color = (type === 'error') ? '#cc0000' : '#006600';
+        setTimeout(() => {
+            element.classList.add('hidden');
+        }, 5000);
+    }
+
+    // --- Login and Logout ---
+    function handleLogin() {
+        const username = usernameInput.value;
+        const password = passwordInput.value;
+        const user = database.users.find(u => u.username === username && u.password === password);
+
+        if (user) {
+            currentUser = user;
+            switch (user.role) {
+                case 'admin':
+                    showView('admin-view');
+                    renderAdminDashboard();
+                    break;
+                case 'mentor':
+                    showView('mentor-view');
+                    mentorWelcomeMessage.textContent = Welcome, ${user.username};
+                    renderMentorDashboard();
+                    break;
+                case 'student':
+                    showView('student-view');
+                    studentWelcomeMessage.textContent = Welcome, ${user.username};
+                    renderStudentDashboard();
+                    break;
+            }
+        } else {
+            showMessage(loginMessage, 'Invalid username or password.');
+        }
+    }
+
+    function handleLogout() {
+        currentUser = null;
+        usernameInput.value = '';
+        passwordInput.value = '';
+        showView('login-view');
+    }
+
+    // --- Admin Functions ---
+    function renderAdminDashboard() {
+        adminActivitiesList.innerHTML = '';
+        const allActivities = [
+            ...database.users.map(u => ({ type: 'User', ...u })),
+            ...database.tasks.map(t => ({ type: 'Task', ...t })),
+            ...database.grades.map(g => ({ type: 'Grade', ...g })),
+            ...database.feedback.map(f => ({ type: 'Feedback', ...f }))
+        ];
+
+        if (allActivities.length === 0) {
+            adminActivitiesList.innerHTML = '<p>No activities to show.</p>';
+            return;
+        }
+
+        allActivities.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'list-item';
+            
+            let content = <h4>${item.type}</h4>;
+            
+            switch (item.type) {
+                case 'User':
+                    content += <p><strong>ID:</strong> ${item.id} | <strong>Username:</strong> ${item.username} | <strong>Role:</strong> ${item.role}</p>;
+                    break;
+                case 'Task':
+                    const mentor = database.users.find(u => u.id === item.mentorId);
+                    const student = database.users.find(u => u.id === item.assignedToStudentId);
+                    content += <p><strong>ID:</strong> ${item.id} | <strong>Title:</strong> ${item.title}</p>;
+                    content += <p><strong>Assigned By:</strong> ${mentor.username} | <strong>Assigned To:</strong> ${student.username}</p>;
+                    content += <p><strong>Description:</strong> ${item.description}</p>;
+                    break;
+                case 'Grade':
+                    const taskForGrade = database.tasks.find(t => t.id === item.taskId);
+                    const studentForGrade = database.users.find(u => u.id === item.studentId);
+                    content += <p><strong>ID:</strong> ${item.id} | <strong>Task:</strong> ${taskForGrade.title}</p>;
+                    content += <p><strong>Student:</strong> ${studentForGrade.username}</p>;
+                    content += <p><strong>Grade:</strong> ${item.grade}</p>;
+                    content += <p><strong>Mentor Feedback:</strong> ${item.mentorFeedback}</p>;
+                    break;
+                case 'Feedback':
+                    const taskForFeedback = database.tasks.find(t => t.id === item.taskId);
+                    const studentForFeedback = database.users.find(u => u.id === item.studentId);
+                    content += <p><strong>ID:</strong> ${item.id} | <strong>Task:</strong> ${taskForFeedback.title}</p>;
+                    content += <p><strong>Student:</strong> ${studentForFeedback.username}</p>;
+                    content += <p><strong>Feedback (Doubt):</strong> ${item.feedback}</p>;
+                    break;
+            }
+
+            el.innerHTML = content;
+            adminActivitiesList.appendChild(el);
+        });
+    }
+
+    function handleCreateUser() {
+        const username = newUserUsername.value.trim();
+        const password = newUserPassword.value.trim();
+        const role = newUserRole.value;
+
+        if (username === '' || password === '') {
+            showMessage(userCreationMessage, 'Username and password cannot be empty.');
+            return;
+        }
+        
+        if (database.users.find(u => u.username === username)) {
+            showMessage(userCreationMessage, User with username "${username}" already exists., 'error');
+            return;
+        }
+
+        const newUser = {
+            id: nextUserId++,
+            username,
+            password,
+            role
+        };
+        database.users.push(newUser);
+        
+        showMessage(userCreationMessage, User "${username}" created successfully with role: ${role}, 'success');
+        newUserUsername.value = '';
+        newUserPassword.value = '';
+        renderAdminDashboard();
+    }
+
+    // --- Mentor Functions ---
+    function renderMentorDashboard() {
+        const studentUsers = database.users.filter(u => u.role === 'student');
+        assignStudentSelect.innerHTML = '';
+        studentUsers.forEach(student => {
+            const option = document.createElement('option');
+            option.value = student.id;
+            option.textContent = student.username;
+            assignStudentSelect.appendChild(option);
+        });
+
+        mentorTasksList.innerHTML = '';
+        const myTasks = database.tasks.filter(t => t.mentorId === currentUser.id);
+
+        if (myTasks.length === 0) {
+            mentorTasksList.innerHTML = '<p>No tasks created yet.</p>';
+            return;
+        }
+
+        myTasks.forEach(task => {
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'list-item';
+            const assignedStudent = database.users.find(u => u.id === task.assignedToStudentId);
+            const grade = database.grades.find(g => g.taskId === task.id);
+            const studentFeedback = database.feedback.find(f => f.taskId === task.id);
+
+            let content = `
+                <h4>Task: ${task.title}</h4>
+                <p><strong>Assigned to:</strong> ${assignedStudent.username}</p>
+                <p><strong>Description:</strong> ${task.description}</p>
+                <div class="details">
+            `;
+
+            if (grade) {
+                content += `
+                    <h5>Grade and Feedback Given</h5>
+                    <p><strong>Grade:</strong> ${grade.grade}</p>
+                    <p><strong>Feedback:</strong> ${grade.mentorFeedback}</p>
+                `;
+            } else {
+                content += `
+                    <h5>Give Grade and Feedback</h5>
+                    <div class="form-group">
+                        <label for="grade-${task.id}">Grade:</label>
+                        <input type="text" id="grade-${task.id}">
+                    </div>
+                    <div class="form-group">
+                        <label for="mentor-feedback-${task.id}">Feedback:</label>
+                        <textarea id="mentor-feedback-${task.id}" rows="2"></textarea>
+                    </div>
+                    <button class="btn" onclick="giveGrade(${task.id}, ${assignedStudent.id})">Submit Grade</button>
+                `;
+            }
+
+            if (studentFeedback) {
+                content += `
+                    <h5 style="margin-top: 20px;">Student Doubt/Feedback</h5>
+                    <p>${studentFeedback.feedback}</p>
+                `;
+            }
+
+            content += '</div>';
+            taskDiv.innerHTML = content;
+            mentorTasksList.appendChild(taskDiv);
+        });
+    }
+
+    function handleCreateTask() {
+        const title = taskTitleInput.value.trim();
+        const description = taskDescriptionInput.value.trim();
+        const assignedStudentId = parseInt(assignStudentSelect.value);
+
+        if (title === '' || description === '') {
+            showMessage(taskCreationMessage, 'Task title and description cannot be empty.');
+            return;
+        }
+
+        const newTask = {
+            id: nextTaskId++,
+            title,
+            description,
+            mentorId: currentUser.id,
+            assignedToStudentId: assignedStudentId
+        };
+        database.tasks.push(newTask);
+        
+        showMessage(taskCreationMessage, Task "${title}" created successfully., 'success');
+        taskTitleInput.value = '';
+        taskDescriptionInput.value = '';
+        renderMentorDashboard();
+        renderAdminDashboard();
+    }
+
+    function giveGrade(taskId, studentId) {
+        const gradeInput = document.getElementById(grade-${taskId});
+        const feedbackTextarea = document.getElementById(mentor-feedback-${taskId});
+        
+        const grade = gradeInput.value.trim();
+        const mentorFeedback = feedbackTextarea.value.trim();
+
+        if (grade === '' || mentorFeedback === '') {
+            alert('Grade and feedback cannot be empty.');
+            return;
+        }
+
+        const newGrade = {
+            id: nextGradeId++,
+            taskId,
+            studentId,
+            grade,
+            mentorFeedback
+        };
+        database.grades.push(newGrade);
+        
+        alert('Grade and feedback submitted successfully!');
+        renderMentorDashboard();
+        renderStudentDashboard();
+        renderAdminDashboard();
+    }
+
+    // --- Student Functions ---
+    function renderStudentDashboard() {
+        studentTasksList.innerHTML = '';
+        const myTasks = database.tasks.filter(t => t.assignedToStudentId === currentUser.id);
+
+        if (myTasks.length === 0) {
+            studentTasksList.innerHTML = '<p>No tasks assigned yet.</p>';
+            return;
+        }
+
+        myTasks.forEach(task => {
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'list-item';
+            const mentor = database.users.find(u => u.id === task.mentorId);
+            const grade = database.grades.find(g => g.taskId === task.id);
+            const studentFeedback = database.feedback.find(f => f.taskId === task.id);
+
+            let content = `
+                <h4>Task: ${task.title}</h4>
+                <p><strong>Assigned by:</strong> ${mentor.username}</p>
+                <p><strong>Description:</strong> ${task.description}</p>
+                <div class="details">
+            `;
+
+            if (grade) {
+                content += `
+                    <h5>Your Grade</h5>
+                    <p><strong>Grade:</strong> ${grade.grade}</p>
+                    <p><strong>Mentor Feedback:</strong> ${grade.mentorFeedback}</p>
+                `;
+            } else {
+                content += <p>Grade: Pending</p>;
+            }
+
+            if (!studentFeedback) {
+                content += `
+                    <h5 style="margin-top: 20px;">Ask a Doubt (Feedback to Mentor)</h5>
+                    <div class="form-group">
+                        <textarea id="student-doubt-${task.id}" rows="2"></textarea>
+                    </div>
+                    <button class="btn" onclick="submitStudentFeedback(${task.id})">Submit Doubt</button>
+                `;
+            } else {
+                content += `
+                    <h5 style="margin-top: 20px;">Your Submitted Doubt</h5>
+                    <p>${studentFeedback.feedback}</p>
+                `;
+            }
+
+            content += '</div>';
+            taskDiv.innerHTML = content;
+            studentTasksList.appendChild(taskDiv);
+        });
+    }
+
+    function submitStudentFeedback(taskId) {
+        const feedbackTextarea = document.getElementById(student-doubt-${taskId});
+        const feedback = feedbackTextarea.value.trim();
+
+        if (feedback === '') {
+            alert('Feedback cannot be empty.');
+            return;
+        }
+
+        const newFeedback = {
+            id: nextFeedbackId++,
+            taskId,
+            studentId: currentUser.id,
+            feedback
+        };
+        database.feedback.push(newFeedback);
+
+        alert('Feedback (doubt) submitted successfully!');
+        renderStudentDashboard();
+        renderMentorDashboard();
+        renderAdminDashboard();
+    }
+
+    // --- Event Listeners ---
+    loginBtn.addEventListener('click', handleLogin);
+    adminLogoutBtn.addEventListener('click', handleLogout);
+    mentorLogoutBtn.addEventListener('click', handleLogout);
+    studentLogoutBtn.addEventListener('click', handleLogout);
+    createUserBtn.addEventListener('click', handleCreateUser);
+    createTaskBtn.addEventListener('click', handleCreateTask);
+    
+    // Refresh button for admin dashboard
+    document.getElementById('refresh-admin-btn').addEventListener('click', renderAdminDashboard);
+
+    // Initial state
+    window.onload = function() {
+        showView('login-view');
+    };
+</script>
+</body>
+</html>
